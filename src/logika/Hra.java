@@ -18,6 +18,10 @@ public class Hra implements IHra {
 
     public Hra() throws IOException, ChybneDataException {
         plan = new HernyPlan();
+        prikazy.pridaj(new PrikazChod(plan));
+        prikazy.pridaj(new PrikazNastup(plan));
+        prikazy.pridaj(new PrikazRozhliadni(plan));
+        prikazy.pridaj(new PrikazPrezri(plan));
         prikazy.pridaj(new PrikazNapoveda(plan, prikazy));
         prikazy.pridaj(new PrikazKoniec(this, plan));
     }
