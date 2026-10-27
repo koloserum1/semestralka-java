@@ -1,0 +1,120 @@
+# =====================================================================
+#  Herny svet hry "RegioJet do Prahy"
+#  Kazdy riadok = jeden zaznam, polia oddeluje ";".
+#  Prve pole je typ zaznamu. Hodnota "-" znamena "nic".
+#  Riadky zacinajuce "#" su komentare.
+# =====================================================================
+
+# NASTAVENIE;nazov;hodnota
+NASTAVENIE;limit;8
+NASTAVENIE;bonus;4
+
+# LOKALITA;id;nazov;popis
+LOKALITA;nastupiste;Nástupište 1;Bratislava hlavná stanica, nedeľa večer. Pri vlaku RegioJet stojí stevardka.
+LOKALITA;lowcost;Vozeň Low cost;Vozeň je plný. Oproti sedí Jarda, nohy v ponožkách vyložené na sedadle. Z tašky mu trčí nabíjačka.
+LOKALITA;standard;Vozeň Standard;Tu je tvoje miesto č. 45. Pani Marta cestuje s obrovským kufrom. Na konci vozňa je kávovar.
+LOKALITA;wc;WC;Malé WC so zásuvkou na holiace strojčeky. Dalo by sa tu schovať pred kontrolou.
+LOKALITA;business;Vozeň Business;Tiché kožené sedadlá. Manažér hlasno telefonuje.
+LOKALITA;praha;Praha hl. n.;Praha hlavní nádraží. Konečne!
+
+# VYCHOD;odkial;kam;podmienka;text ked je cesta zatvorena
+VYCHOD;nastupiste;lowcost;-;-
+VYCHOD;lowcost;standard;-;-
+VYCHOD;lowcost;praha;VLAK_V_PRAHE;Vlak ešte nie je v Prahe.
+VYCHOD;standard;lowcost;-;-
+VYCHOD;standard;wc;-;-
+VYCHOD;standard;business;KUFOR_ODPRATANY;Uličku blokuje obrovský kufor.
+VYCHOD;wc;standard;-;-
+VYCHOD;business;standard;-;-
+
+# PREDMET;id;nazov;popis;umiestnenie (inventar / id lokality / -);pocet;da sa polozit
+PREDMET;mobil;mobil;Tvoj mobil. Je v ňom lístok na vlak.;inventar;1;nie
+PREDMET;rezen;rezeň;Rezeň od mamy, zabalený v alobale.;inventar;3;ano
+PREDMET;nabijacka;nabíjačka;Jardova nabíjačka na mobil.;-;0;ano
+PREDMET;kelimok;kelímok;Prázdny papierový kelímok.;business;1;ano
+PREDMET;kava;káva;Horúca káva z kávovaru.;-;0;ano
+
+# OBJEKT;id;nazov;lokalita;popis
+OBJEKT;kufor;kufor;standard;Obrovský kufor pani Marty. Patrí na policu nad sedadlami.
+OBJEKT;kavovar;kávovar;standard;Kávovar pre cestujúcich. Potrebuješ do neho kelímok.
+OBJEKT;zasuvka;zásuvka;standard;Zásuvka pri sedadle. Nefunguje.
+OBJEKT;sedadlo;sedadlo č. 45;standard;Tvoje miesto. Sadnúť si môžeš, keď máš platný lístok.
+OBJEKT;zasuvka;zásuvka na strojčeky;wc;Zásuvka na holiace strojčeky. Mobil sa z nej nenabije.
+OBJEKT;zasuvka;zásuvka;business;Jediná funkčná zásuvka vo vlaku.
+
+# POSTAVA;id;meno;lokalita;popis;stav po splneni;replika pred;replika po
+POSTAVA;stevardka;stevardka;nastupiste;Usmievavá stevardka RegioJetu.;-;„Lístky kontrolujem až vo vlaku. Do Břeclavi prejdem celý vlak a kto lístok nemá, v Břeclavi vystupuje.“;-
+POSTAVA;jarda;Jarda;lowcost;Hladný český turista. Z tašky mu trčí nabíjačka.;NABIJACKA_ZISKANA;„Hele, to voní jak řízek! Za jeden ti půjčím nabíječku.“;„Díky za řízek, kámo. Víc už nemám.“
+POSTAVA;marta;pani Marta;standard;Staršia pani s obrovským kufrom.;KUFOR_ODPRATANY;„Mladý pán, pomohli by ste mi vyložiť kufor na policu? Nikto nemôže prejsť.“;„Ďakujem, ste zlatý!“
+POSTAVA;manazer;manažér;business;Manažér v obleku, nabíja si notebook a telefonuje.;ZASUVKA_VOLNA;„Teraz nie, mám call. Bez kávy zásuvku neuvoľním.“;„Vďaka za kávu. Zásuvka je tvoja.“
+
+# ULOHA;id;nazov;zadanie;kto ju zadava (- = od zaciatku);stav, ktory ju splni
+ULOHA;hlavna;Dostaň sa do Prahy;Nabi mobil skôr, ako príde kontrola, sadni si a vystúp v Prahe.;-;VLAK_V_PRAHE
+ULOHA;nabijacka;Získaj nabíjačku;Vymeň s Jardom rezeň za nabíjačku.;jarda;NABIJACKA_ZISKANA
+ULOHA;kufor;Vylož kufor;Pomôž pani Marte vyložiť kufor na policu.;marta;KUFOR_ODPRATANY
+ULOHA;kava;Prines kávu;Prines manažérovi kávu, potom uvoľní zásuvku.;manazer;ZASUVKA_VOLNA
+
+# PRAVIDLO;prikaz;lokalita;predmet;ciel;potrebny stav;text ked chyba stav;spotrebuje sa;ziska sa;nastavi stav;text
+PRAVIDLO;pouzi;standard;kelimok;kavovar;-;-;ano;kava;-;Kávovar zabzučí a kelímok sa naplní. Máš kávu.
+PRAVIDLO;pouzi;business;nabijacka;zasuvka;ZASUVKA_VOLNA;Zásuvka je obsadená.;nie;-;MOBIL_NABITY;Pripojil si mobil. Mobil je nabitý a lístok sa dá ukázať!
+PRAVIDLO;pouzi;standard;nabijacka;zasuvka;-;-;nie;-;-;Táto zásuvka nefunguje.
+PRAVIDLO;pouzi;wc;nabijacka;zasuvka;-;-;nie;-;-;Z tejto zásuvky sa mobil nenabije.
+PRAVIDLO;daj;lowcost;rezen;jarda;-;-;ano;nabijacka;NABIJACKA_ZISKANA;Jarda ti podá nabíjačku. Máš nabíjačku.
+PRAVIDLO;daj;business;kava;manazer;-;-;ano;-;ZASUVKA_VOLNA;Manažér si vezme kávu a uvoľní zásuvku.
+
+# TEXT;kluc;text  ("{}" sa nahradi doplnkom, napr. nazvom predmetu)
+TEXT;uvod;Je nedeľa večer a stojíš na nástupišti v Bratislave. Lístok do Prahy máš iba v mobile a mobil je vybitý. Nabíjačku si nechal doma. Stevardka vo vlaku kontroluje lístky a kto ho nemá, toho v Břeclavi vysadí. Po nastúpení máš {} presunov, kým príde kontrola. Ak nevieš, čo robiť, napíš napoveda.
+TEXT;vyhra;Vystupuješ v Prahe. Mobil je nabitý, lístok skontrolovaný a mamine rezne máš v taške. VYHRAL SI!
+TEXT;prehra;Stevardka prišla ku kontrole a tvoj mobil je stále vybitý. V Břeclavi musíš vystúpiť. PREHRAL SI.
+TEXT;ukoncenie;Hru si ukončil príkazom koniec.
+TEXT;dakujeme;Ďakujeme, že si hral.
+TEXT;napoveda;Cieľ: nabi mobil skôr, ako príde kontrola, a dostaň sa do Prahy. Príkazy: {}. Lokality: nastupiste, lowcost, standard, wc, business, praha.
+TEXT;nerozumiem;Tomu nerozumiem. Napíš napoveda.
+TEXT;chyba_parametra;Čo presne? (napr. {})
+TEXT;nemas;Nemáš pri sebe: {}.
+TEXT;nesusedi;Tam sa odtiaľto nedostaneš.
+TEXT;nejde;To nejde.
+TEXT;chyba;Pri vykonaní príkazu nastala chyba.
+TEXT;postavy;Postavy
+TEXT;objekty;Objekty
+TEXT;predmety;Predmety
+TEXT;vychody;Východy
+TEXT;zostava;Do kontroly zostáva {}.
+TEXT;presun_1;presun
+TEXT;presun_2;presuny
+TEXT;presun_5;presunov
+TEXT;uz_vo_vlaku;Už si vo vlaku.
+TEXT;nevidis;Nič také tu nevidíš.
+TEXT;vzal;Vzal si: {}.
+TEXT;neda_sa_vziat;To sa nedá vziať.
+TEXT;nie_je_tu;Taký predmet tu nie je.
+TEXT;polozil;Položil si: {}.
+TEXT;nepolozis;Predmet {} sa položiť nedá.
+TEXT;nenechavaj;Tu nič nenechávaj, na nástupište sa už nevrátiš.
+TEXT;postava_nie_je;Postava {} tu nie je.
+TEXT;odmieta;{} to nechce.
+TEXT;nejedlo;To sa nedá zjesť.
+TEXT;zjedol;Zjedol si rezeň. Mama varí najlepšie.
+TEXT;plny;Už nevládzeš, si plný.
+TEXT;kufor_tu_nie;Tu nie je žiadny kufor.
+TEXT;kufor_uz;Kufor už je na polici.
+TEXT;nevladzes;Nevládzeš, od rána si nejedol.
+TEXT;kufor_ok;Vyložil si kufor na policu. Pani Marta ďakuje. Cesta do Business je voľná.
+TEXT;sadni_tu_nie;Tu si nemáš kam sadnúť.
+TEXT;bez_listka;Bez lístka si radšej nesadneš.
+TEXT;uz_v_prahe;Vlak už stojí v Prahe. Vystúp z vozňa Low cost.
+TEXT;sadnutie;Sadneš si na miesto č. 45. Prichádza stevardka, ukážeš jej lístok v mobile a ona sa usmeje. Zvyšok cesty prespíš. Vlak stojí v Prahe, vystúpiť môžeš z vozňa Low cost.
+TEXT;wc_tu_nie;Tu sa nemáš kam schovať.
+TEXT;wc_uz;Stevardka už vie, kde ťa hľadať.
+TEXT;wc_ok;Zamkol si sa na WC a stevardka prešla okolo. Získal si {} presuny navyše.
+TEXT;inventar;Máš pri sebe:
+TEXT;mobil_vybity;Mobil je vybitý.
+TEXT;mobil_nabity;Mobil je nabitý.
+TEXT;ulohy;Úlohy:
+TEXT;AKTIVNA;aktívna
+TEXT;SPLNENA;splnená
+TEXT;ulozene;Hra bola uložená.
+TEXT;chyba_ulozenia;Hru sa nepodarilo uložiť.
+TEXT;nahrane;Uložená hra bola načítaná.
+TEXT;ziadne_ulozenie;Žiadna uložená hra neexistuje.
+TEXT;chyba_nahratia;Uloženú hru sa nepodarilo načítať, hra začína odznova.
