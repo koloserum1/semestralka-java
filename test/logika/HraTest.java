@@ -88,6 +88,21 @@ class HraTest {
         assertEquals(0, plan.getPocitadlo());
     }
 
+    @Test
+    void schovaj_pridaBonusIbaRaz_naWc() {
+        hraj("nastup", "chod standard", "chod wc");
+        assertEquals(plan.text("wc_ok", "4"), hraj("schovaj sa"));
+        assertEquals(12, plan.getLimit());
+        assertEquals(plan.text("wc_uz"), hraj("schovaj sa"));
+        assertEquals(12, plan.getLimit());
+    }
+
+    @Test
+    void schovaj_nefunguje_mimoWc() {
+        assertEquals(plan.text("wc_tu_nie"), hraj("nastup", "schovaj sa"));
+        assertEquals(8, plan.getLimit());
+    }
+
     // ===== predmety a mechaniky =====
 
     @Test
@@ -126,6 +141,12 @@ class HraTest {
         hraj("nastup", "chod standard", "pouzi kelimok kavovar");
         assertTrue(plan.maVInventari("kava"));
         assertFalse(plan.maVInventari("kelimok"));
+    }
+
+    @Test
+    void sadni_bezListka_kymNieJeMobilNabity() {
+        assertEquals(plan.text("bez_listka"), hraj("nastup", "chod standard", "sadni"));
+        assertFalse(plan.maStav(Stav.VLAK_V_PRAHE));
     }
 
     @Test
@@ -200,4 +221,38 @@ class HraTest {
         assertEquals("standard", plan.getAktualnaLokalita().getId());
     }
 
+    // ===== ulozenie a nacitanie =====
+
+    @Test
+    void nahraj_obnoviPresneUlozenyStav() throws Exception {
+        hraj("nastup", "daj rezen jarda", "chod standard", "zjedz rezen", "zdvihni kufor",
+                "chod business", "vezmi kelimok");
+        assertEquals(plan.text("ulozene"), hraj("uloz"));
+
+        Hra novaHra = new Hra();
+        HernyPlan novyPlan = novaHra.getHernyPlan();
+        novaHra.spracujPrikaz("nahraj");
+
+        assertEquals("business", novyPlan.getAktualnaLokalita().getId());
+        assertEquals(2, novyPlan.getPocitadlo());
+        assertTrue(novyPlan.maVInventari("kelimok"));
+        assertTrue(novyPlan.maVInventari("nabijacka"));
+        assertTrue(novyPlan.getLokalita("business").getPredmety().isEmpty());   // kelimok nelezi znova na stoliku
+        assertTrue(novyPlan.maStav(Stav.KUFOR_ODPRATANY));
+        assertTrue(novyPlan.maStav(Stav.NAJEDENY));
+        assertEquals(StavUlohy.SPLNENA, novyPlan.getUloha("nabijacka").getStav(novyPlan.getStavy()));
+        assertEquals(4, novyPlan.getInventar().size());   // mobil, rezen, nabijacka, kelimok
+
+        novaHra.spracujPrikaz("chod standard");
+        novaHra.spracujPrikaz("chod lowcost");
+        assertEquals(novyPlan.text("odmieta", "Jarda"), novaHra.spracujPrikaz("daj rezen jarda"));
+
+        assertTrue(new File(Ulozenie.SUBOR).delete());
+    }
+
+    @Test
+    void nahraj_hlasiChybu_kedUlozenaHraNeexistuje() {
+        new File(Ulozenie.SUBOR).delete();
+        assertEquals(plan.text("ziadne_ulozenie"), hraj("nahraj"));
+    }
 }
