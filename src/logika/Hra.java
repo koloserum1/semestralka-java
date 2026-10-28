@@ -22,6 +22,11 @@ public class Hra implements IHra {
         prikazy.pridaj(new PrikazNastup(plan));
         prikazy.pridaj(new PrikazRozhliadni(plan));
         prikazy.pridaj(new PrikazPrezri(plan));
+        prikazy.pridaj(new PrikazVezmi(plan));
+        prikazy.pridaj(new PrikazPoloz(plan));
+        prikazy.pridaj(new PrikazZjedz(plan));
+        prikazy.pridaj(new PrikazZdvihni(plan));
+        prikazy.pridaj(new PrikazInventar(plan));
         prikazy.pridaj(new PrikazNapoveda(plan, prikazy));
         prikazy.pridaj(new PrikazKoniec(this, plan));
     }

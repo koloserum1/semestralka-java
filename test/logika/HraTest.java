@@ -88,6 +88,37 @@ class HraTest {
         assertEquals(0, plan.getPocitadlo());
     }
 
+    // ===== predmety a mechaniky =====
+
+    @Test
+    void zdvihni_nevladzes_bezJedla() {
+        assertEquals(plan.text("nevladzes"), hraj("nastup", "chod standard", "zdvihni kufor"));
+        assertFalse(plan.maStav(Stav.KUFOR_ODPRATANY));
+    }
+
+    @Test
+    void zjedz_zjeIbaJedenRezen() {
+        assertEquals(plan.text("zjedol"), hraj("zjedz rezen"));
+        assertEquals(plan.text("plny"), hraj("zjedz rezen"));
+        assertEquals(3, plan.getInventar().size());   // mobil + 2 rezne
+    }
+
+    @Test
+    void poloz_mobilSaPolozitNeda() {
+        hraj("nastup");
+        assertEquals(plan.text("nepolozis", "mobil"), hraj("poloz mobil"));
+        assertTrue(plan.maVInventari("mobil"));
+    }
+
+    @Test
+    void poloz_vezmi_predmetSaDaZnovaVziat() {
+        hraj("nastup", "poloz rezen");
+        assertNotNull(Predmet.najdi(plan.getAktualnaLokalita().getPredmety(), "rezen"));
+        hraj("vezmi rezen");
+        assertNull(Predmet.najdi(plan.getAktualnaLokalita().getPredmety(), "rezen"));
+        assertEquals(4, plan.getInventar().size());
+    }
+
     // ===== chybove situacie =====
 
     @ParameterizedTest
@@ -105,10 +136,22 @@ class HraTest {
     @ParameterizedTest
     @CsvSource({
             "chod, chod standard",
-            "prezri, prezri kufor"
+            "vezmi, vezmi kelimok",
+            "poloz, poloz kelimok",
+            "prezri, prezri kufor",
+            "zjedz, zjedz rezen",
+            "zdvihni, zdvihni kufor"
     })
     void vykonaj_vratiChybuParametra_kedChybaParameter(String vstup, String priklad) {
         assertEquals(plan.text("chyba_parametra", priklad), hraj(vstup));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"poloz nabijacka"})
+    void vykonaj_hlasiNemas_kedHracPredmetNema(String vstup) {
+        hraj("nastup");
+        String predmet = vstup.split(" ")[1];
+        assertEquals(plan.text("nemas", predmet), hraj(vstup));
     }
 
     @Test
