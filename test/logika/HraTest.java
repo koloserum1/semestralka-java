@@ -41,6 +41,20 @@ class HraTest {
     // ===== cela hra =====
 
     @Test
+    void hra_vyhra_najkratsouCestou() {
+        hraj("nastup", "daj rezen jarda", "chod standard", "zjedz rezen", "zdvihni kufor",
+                "chod business", "vezmi kelimok", "chod standard", "pouzi kelimok kavovar",
+                "chod business", "daj kava manazer", "pouzi nabijacka zasuvka",
+                "chod standard", "sadni", "chod lowcost");
+        assertFalse(hra.konecHry());
+        hraj("chod praha");
+        assertTrue(plan.jeVyhra());
+        assertFalse(plan.jePrehra());
+        assertTrue(hra.konecHry());
+        assertEquals(plan.text("vyhra"), hra.vratEpilog());
+    }
+
+    @Test
     void chod_prehra_poOsmomPresuneBezNabitehoMobilu() {
         hraj("nastup");
         for (int i = 1; i <= 8; i++) {
