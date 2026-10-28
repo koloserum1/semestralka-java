@@ -104,6 +104,31 @@ class HraTest {
     }
 
     @Test
+    void daj_jardaPrijmeIbaJedenRezen() {
+        hraj("nastup", "daj rezen jarda");
+        assertTrue(plan.maVInventari("nabijacka"));
+        assertEquals(plan.text("odmieta", "Jarda"), hraj("daj rezen jarda"));
+        assertEquals(4, plan.getInventar().size());   // mobil + 2 rezne + nabijacka
+    }
+
+    @Test
+    void pouzi_zasuvkaJeObsadena_kymManazerNedostaneKavu() {
+        plan.getInventar().add(plan.getPredmet("nabijacka"));
+        plan.pridajStav(Stav.KUFOR_ODPRATANY);
+        hraj("nastup", "chod standard", "chod business");
+        assertTrue(hraj("pouzi nabijacka zasuvka").contains("obsaden"));
+        assertFalse(plan.maStav(Stav.MOBIL_NABITY));
+    }
+
+    @Test
+    void pouzi_kelimokSaZmeniNaKavu_priKavovare() {
+        plan.getInventar().add(plan.getPredmet("kelimok"));
+        hraj("nastup", "chod standard", "pouzi kelimok kavovar");
+        assertTrue(plan.maVInventari("kava"));
+        assertFalse(plan.maVInventari("kelimok"));
+    }
+
+    @Test
     void poloz_mobilSaPolozitNeda() {
         hraj("nastup");
         assertEquals(plan.text("nepolozis", "mobil"), hraj("poloz mobil"));
@@ -117,6 +142,17 @@ class HraTest {
         hraj("vezmi rezen");
         assertNull(Predmet.najdi(plan.getAktualnaLokalita().getPredmety(), "rezen"));
         assertEquals(4, plan.getInventar().size());
+    }
+
+    // ===== ulohy a dialogy =====
+
+    @Test
+    void hovor_hracDostaneUlohu_odMarty() {
+        assertEquals(StavUlohy.NEPRIJATA, plan.getUloha("kufor").getStav(plan.getStavy()));
+        hraj("nastup", "chod standard", "hovor marta");
+        assertEquals(StavUlohy.AKTIVNA, plan.getUloha("kufor").getStav(plan.getStavy()));
+        hraj("zjedz rezen", "zdvihni kufor");
+        assertEquals(StavUlohy.SPLNENA, plan.getUloha("kufor").getStav(plan.getStavy()));
     }
 
     // ===== chybove situacie =====
@@ -139,6 +175,10 @@ class HraTest {
             "vezmi, vezmi kelimok",
             "poloz, poloz kelimok",
             "prezri, prezri kufor",
+            "pouzi, pouzi kelimok kavovar",
+            "pouzi kelimok, pouzi kelimok kavovar",
+            "daj, daj rezen jarda",
+            "hovor, hovor jarda",
             "zjedz, zjedz rezen",
             "zdvihni, zdvihni kufor"
     })
@@ -147,7 +187,7 @@ class HraTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"poloz nabijacka"})
+    @ValueSource(strings = {"pouzi kelimok kavovar", "daj kava jarda", "poloz nabijacka"})
     void vykonaj_hlasiNemas_kedHracPredmetNema(String vstup) {
         hraj("nastup");
         String predmet = vstup.split(" ")[1];
